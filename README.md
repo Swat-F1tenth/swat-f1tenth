@@ -5,7 +5,7 @@ the message used by wall following (dist_finder -> pid).
 
 ## Set up the car (Jetson)
     mkdir -p ~/swat_ws/src && cd ~/swat_ws/src
-    git clone https://github.com/ORG/swat-f1tenth.git
+    git clone https://github.com/Swat-F1tenth/swat-f1tenth.git
     vcs import < swat-f1tenth/car.repos
     git -C f1tenth_system submodule update --init --recursive
     cd ~/swat_ws
@@ -19,7 +19,7 @@ forks of f1tenth_system and vesc.
 
 ## Set up a laptop (simulator)
     mkdir -p ~/swat_ws/src && cd ~/swat_ws/src
-    git clone https://github.com/ORG/swat-f1tenth.git
+    git clone https://github.com/Swat-F1tenth/swat-f1tenth.git
     vcs import < swat-f1tenth/sim.repos
     cd ~/swat_ws
     rosdep install --from-paths src --ignore-src -y
