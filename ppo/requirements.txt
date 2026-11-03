@@ -4,5 +4,6 @@ stable-baselines3
 gymnasium
 tensorboard
 
+mujoco
 numpy
 scipy

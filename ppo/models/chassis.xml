@@ -1,0 +1,21 @@
+<mujoco>
+    <compiler meshdir="../meshes/" />
+
+    <include file="materials.xml" />
+
+    <default>
+        <default class="visual">
+            <geom pos="0 0 0" euler="0 0 0" />
+        </default>
+    </default>    
+
+    <asset>
+        <mesh name="Chassis" file="Chassis.STL" />
+    </asset>
+
+    <worldbody>
+        <body name="Chassis">
+            <geom type="mesh" mesh="Chassis" class="visual" material="black" mass="1.5" />
+        </body>
+    </worldbody>
+</mujoco>
