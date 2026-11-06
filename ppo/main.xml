@@ -25,6 +25,10 @@
 
     <asset>
         <model name="Chassis" file="models/chassis.xml" />
+        <model name="WheelFL" file="models/wheelfl.xml" />
+       <!--  <model name="WheelFR" file="models/wheelfr.xml" /> -->
+       <!-- <model name="WheelRL" file="models/wheelrl.xml" /> -->
+       <!-- <model name="WheelRR" file="models/wheelrr.xml" /> -->
     </asset>
 
      <worldbody>
