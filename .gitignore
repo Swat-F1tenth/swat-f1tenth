@@ -12,6 +12,8 @@ rosbag2_*/
 venv/
 env/
 
+f1tenth_gym
+f1tenth_ng
 
 __pycache__/
 *.py[cod]
