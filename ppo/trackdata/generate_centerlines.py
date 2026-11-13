@@ -8,6 +8,7 @@ num_centerline_coords = 150
 
 #All units in meters unless otherwise specified
 track_max_size = 100 #This refers to the maximum side length of a square bounding the track area. E.g. 10 for a circular track of radius 5
+track_min_size = 20
 
 max_points=15 #Max number of points to spawn for the convex hull. Higher values leads to basically square tracks, small are more varied.
 min_points=7 #Minimum number of points of the above
@@ -21,6 +22,7 @@ def calculate_max(maximumvalue, minimumvalue):
     return(maxrandvalue,addfactor)
 
 maxrandvalue_track, addfactor_track = calculate_max(max_points, min_points)
+maxrandvalue_size, addfactor_size = calculate_max(track_max_size, track_min_size)
 
 for i in range(0, num_tracks):
     
@@ -30,8 +32,10 @@ for i in range(0, num_tracks):
 
     trackdata_array=np.random.rand(num_points, 2)
 
-    trackdata_array[:, 0] = trackdata_array[:, 0]*track_max_size
-    trackdata_array[:, 1] = trackdata_array[:, 1]*track_max_size
+
+
+    trackdata_array[:, 0] = trackdata_array[:, 0]*(np.random.randint(maxrandvalue_track)+addfactor_size)
+    trackdata_array[:, 1] = trackdata_array[:, 1]*(np.random.randint(maxrandvalue_track)+addfactor_size)
     #trackdata_array[:, 2]= (trackdata_array[:, 2])*(min_width)+(max_width-min_width)
     #trackdata_array[:, 2] = np.clip(trackdata_array[:, 2], min_width, max_width)
     
