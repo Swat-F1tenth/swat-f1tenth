@@ -2,6 +2,9 @@ import pandas as pd
 import numpy as np
 from scipy.spatial import ConvexHull
 from scipy.interpolate import make_interp_spline
+import matplotlib.pyplot as plt
+from scipy import interpolate
+import shapely
 
 num_tracks = 1
 num_centerline_coords = 150
@@ -11,7 +14,7 @@ track_max_size = 100 #This refers to the maximum side length of a square boundin
 track_min_size = 20
 
 max_points=15 #Max number of points to spawn for the convex hull. Higher values leads to basically square tracks, small are more varied.
-min_points=7 #Minimum number of points of the above
+min_points=8 #Minimum number of points of the above
 
 max_width=10
 min_width=5
@@ -32,19 +35,21 @@ for i in range(0, num_tracks):
 
     trackdata_array=np.random.rand(num_points, 2)
 
-
-
     trackdata_array[:, 0] = trackdata_array[:, 0]*(np.random.randint(maxrandvalue_track)+addfactor_size)
     trackdata_array[:, 1] = trackdata_array[:, 1]*(np.random.randint(maxrandvalue_track)+addfactor_size)
-    #trackdata_array[:, 2]= (trackdata_array[:, 2])*(min_width)+(max_width-min_width)
-    #trackdata_array[:, 2] = np.clip(trackdata_array[:, 2], min_width, max_width)
+
+
+    #THIS SECTION ACTIVATES OBSTACLES BUT I DON'T KNOW HOW TO ENSURE THEY DON'T BLOCK THE WHOLE TRACK
+    #obstacledata_array=np.random.rand((num_points*2), 2)
+    
+    #obstacledata_array[:, 0] = obstacledata_array[:, 0]*(np.random.randint(maxrandvalue_track)+addfactor_size)
+    #obstacledata_array[:, 1] = obstacledata_array[:, 1]*(np.random.randint(maxrandvalue_track)+addfactor_size)
     
 
-    hull = ConvexHull(trackdata_array)
-
-    track_points = trackdata_array[hull.vertices]
-
-    track_points = np.vstack([track_points, track_points[0]])
+    hull = shapely.MultiPoint(trackdata_array)
+    hull = shapely.concave_hull(hull, ratio=0.7, allow_holes=False)
+    track_points = shapely.get_coordinates(hull).tolist()
+    track_points = np.array(track_points)
 
     distances = np.sqrt(np.sum(np.diff(track_points, axis=0)**2, axis=1))
     t = np.insert(np.cumsum(distances), 0, 0)
@@ -53,6 +58,22 @@ for i in range(0, num_tracks):
 
     t_smooth = np.linspace(0, t[-1], 100)
     smooth_points = spline(t_smooth)
+
+    track_vectors = zip(smooth_points[:, 0], smooth_points[:, 1])
+    df_trackvectors = pd.DataFrame(track_vectors)
+
+    tck,u = interpolate.splprep(df_trackvectors.transpose(), s=0)
+    unew = np.arange(0, 1.01, 0.01)
+    out = interpolate.splev(unew, tck)
+
+    #ALSO WITH THE OBSTACLE BIT
+    #plt.scatter(obstacledata_array[:, 0], obstacledata_array[:, 1], color='black', marker='s', s=0.5, zorder=3)
+    plt.plot(out[0], out[1], color='black', lw=10)
+    plt.plot(out[0], out[1], color='white', lw=8)
+    plt.show()
+
+    
+
 
 
 
