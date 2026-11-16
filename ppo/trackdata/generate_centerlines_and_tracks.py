@@ -5,19 +5,24 @@ from scipy.interpolate import make_interp_spline
 import matplotlib.pyplot as plt
 from scipy import interpolate
 import shapely
+from pathlib import Path
 
-num_tracks = 1
+num_tracks = 150
 num_centerline_coords = 150
 
 #All units in meters unless otherwise specified
 track_max_size = 100 #This refers to the maximum side length of a square bounding the track area. E.g. 10 for a circular track of radius 5
 track_min_size = 20
 
-max_points=15 #Max number of points to spawn for the convex hull. Higher values leads to basically square tracks, small are more varied.
+max_points=25 #Max number of points to spawn for the concave hull. Higher values leads to basically square tracks, small are more varied.
 min_points=8 #Minimum number of points of the above
 
 max_width=10
 min_width=5
+
+script_dir = Path(__file__).resolve().parent
+output_dir_tr = script_dir / "tracks"
+output_dir_cl = script_dir / "centerlines"
 
 def calculate_max(maximumvalue, minimumvalue):
     maxrandvalue=(maximumvalue-minimumvalue)
@@ -56,7 +61,7 @@ for i in range(0, num_tracks):
 
     spline = make_interp_spline(t, track_points, bc_type="periodic") 
 
-    t_smooth = np.linspace(0, t[-1], 100)
+    t_smooth = np.linspace(0, t[-1], 550)
     smooth_points = spline(t_smooth)
 
     track_vectors = zip(smooth_points[:, 0], smooth_points[:, 1])
@@ -70,7 +75,16 @@ for i in range(0, num_tracks):
     #plt.scatter(obstacledata_array[:, 0], obstacledata_array[:, 1], color='black', marker='s', s=0.5, zorder=3)
     plt.plot(out[0], out[1], color='black', lw=10)
     plt.plot(out[0], out[1], color='white', lw=8)
-    plt.show()
+    plt.axis('off')
+
+    header_str = "x_m\ty_m"
+
+    plt.savefig(output_dir_tr / f"track_{i}.png")
+    plt.close()
+    
+
+    np.savetxt(output_dir_cl / f"centerline_{i}.tsv", smooth_points, delimiter="\t", header=header_str)
+    print(f"saved track #{i}")
 
     
 
