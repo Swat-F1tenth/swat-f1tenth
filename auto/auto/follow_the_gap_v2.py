@@ -18,12 +18,12 @@ class DisparityFollowGap(Node):
         self.CAR_WIDTH = 0.33             # Total vehicle width (meters)
         self.SAFETY_MARGIN = 0.45         # Clearance buffer from wall apex (meters)
         self.DISPARITY_THRESHOLD = 0.35   # Step change (meters) to trigger disparity
-        self.MAX_LIDAR_DIST = 5.0         # Max range cap (meters)
+        self.MAX_LIDAR_DIST = 4.0         # Max range cap (meters)
         self.FOV_DEG = 70.0               # Forward FOV (+/- 70 degrees)
 
         # Steering Smoothing
         self.prev_steering = 0.0
-        self.SMOOTHING_ALPHA = 0.20       # Low-pass filter (0.1 = smooth, 1.0 = raw)
+        self.SMOOTHING_ALPHA = 0.60       # Low-pass filter (0.1 = smooth, 1.0 = raw)
 
     def scan_callback(self, scan_msg):
         ranges = np.array(scan_msg.ranges)
@@ -45,10 +45,10 @@ class DisparityFollowGap(Node):
         # 2. Apply Disparity Extension
         num_beams = len(proc_ranges)
         r_safe = (self.CAR_WIDTH / 2.0) + self.SAFETY_MARGIN
-
+        raw = proc_ranges.copy()
         for i in range(num_beams - 1):
-            d1 = proc_ranges[i]
-            d2 = proc_ranges[i + 1]
+            d1 = raw[i]
+            d2 = raw[i + 1]
 
             if abs(d1 - d2) > self.DISPARITY_THRESHOLD:
                 r_close = min(d1, d2)
@@ -74,16 +74,21 @@ class DisparityFollowGap(Node):
             return
 
         # Get all beam indices within 15cm of the maximum distance
-        max_indices = np.where(proc_ranges >= (max_val - 0.15))[0]
-
-        # Find continuous index blocks and pick the largest contiguous gap
+        prev = getattr(self, 'prev_target', None)
+        search = proc_ranges
+        if prev is not None:
+            near = np.abs(proc_angles - prev) < np.radians(20)
+            if near.any() and max_val - proc_ranges[near].max() < 1.0:
+                search = np.where(near, proc_ranges, -1.0)
+                max_val = search.max()
+        max_indices = np.where(search >= (max_val - 0.15))[0]
         gaps = np.split(max_indices, np.where(np.diff(max_indices) != 1)[0] + 1)
         largest_gap = max(gaps, key=len)
-
-        # Select MIDPOINT of the gap (fixes right-wall bias)
         target_idx = largest_gap[len(largest_gap) // 2]
         target_angle = proc_angles[target_idx]
-
+        self.prev_target = target_angle
+        #self.get_logger().info(f'gaps={len(gaps)} target={np.degrees(target_angle):.0f} deg max={max_val:.2f}')
+	
         # 4. Steering Deadband & Low-Pass Filter
         if abs(target_angle) < np.radians(2.0):
             target_angle = 0.0
@@ -92,7 +97,7 @@ class DisparityFollowGap(Node):
         self.prev_steering = smoothed_steering
 
         # 5. Speed Profiling
-        speed = 2 if abs(smoothed_steering) < np.radians(10) else 1
+        speed = 1.5 if abs(target_angle) < np.radians(10) else 1
 
         # Publish
         drive_msg = AckermannDriveStamped()
