@@ -8,6 +8,12 @@ class DriveNode(Node):
     def __init__(self):
         super().__init__('drive_node')
         
+        # AEB gate: forwards planner commands from input_topic to /drive,
+        # and sends a stop instead while /aeb is true. Default keeps the
+        # wall follower (pid.launch.py) working unchanged.
+        self.declare_parameter('input_topic', '/pid_drive')
+        input_topic = self.get_parameter('input_topic').get_parameter_value().string_value
+
         self.aeb_active = False
         self.nav_cmd = AckermannDriveStamped()
         
@@ -18,7 +24,7 @@ class DriveNode(Node):
             10)
         self.pid_sub = self.create_subscription(
             AckermannDriveStamped,
-            '/pid_drive',
+            input_topic,
             self.drive_callback,
             10)
         self.drive = self.create_publisher(AckermannDriveStamped, '/drive', 10)

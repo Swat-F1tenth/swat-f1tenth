@@ -16,7 +16,10 @@ class FollowTheGap(Node):
             self.scan_callback, 
             qos_profile_sensor_data
         )
-        self.drive_pub = self.create_publisher(AckermannDriveStamped, '/drive', 10)
+        # Set drive_topic to the AEB gate's input (e.g. /nav_drive) so AEB can stop the car.
+        self.declare_parameter('drive_topic', '/drive')
+        drive_topic = self.get_parameter('drive_topic').get_parameter_value().string_value
+        self.drive_pub = self.create_publisher(AckermannDriveStamped, drive_topic, 10)
         
         self.bubble_radius = 100       
         self.max_range = 3.5          

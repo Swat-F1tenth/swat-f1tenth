@@ -27,9 +27,11 @@ class Dist_Finder_Node(Node):
             '/scan',
             self.laser_callback,
             10)
+        self.declare_parameter('odom_topic', '/odom')
+        odom_topic = self.get_parameter('odom_topic').get_parameter_value().string_value
         self.odom_sub = self.create_subscription(
             Odometry,
-            '/ego_racecar/odom',
+            odom_topic,
             self.odom_callback,
             10)
         self.pid_pub = self.create_publisher(PIDInput, '/pid_calc', 10)

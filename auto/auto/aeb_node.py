@@ -13,12 +13,16 @@ class AEB_Node(Node):
         self.declare_parameter('min_ttc', 0.2)
         self.min_ttc = self.get_parameter('min_ttc').get_parameter_value().double_value
         
+        # Car publishes wheel odometry on /odom; the sim uses /ego_racecar/odom.
+        self.declare_parameter('odom_topic', '/odom')
+        odom_topic = self.get_parameter('odom_topic').get_parameter_value().string_value
+
         self.speed = 0.0
         self.brake_triggered = False
         
         self.vel_sub = self.create_subscription(
             Odometry,
-            '/ego_racecar/odom',
+            odom_topic,
             self.odom_callback,
             10)
         self.laser_sub = self.create_subscription(

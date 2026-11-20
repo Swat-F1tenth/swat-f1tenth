@@ -9,7 +9,10 @@ class DisparityFollowGap(Node):
         super().__init__('disparity_follow_gap_node')
 
         self.scan_sub = self.create_subscription(LaserScan, '/scan', self.scan_callback, 10)
-        self.drive_pub = self.create_publisher(AckermannDriveStamped, '/drive', 10)
+        # Set drive_topic to the AEB gate's input (e.g. /nav_drive) so AEB can stop the car.
+        self.declare_parameter('drive_topic', '/drive')
+        drive_topic = self.get_parameter('drive_topic').get_parameter_value().string_value
+        self.drive_pub = self.create_publisher(AckermannDriveStamped, drive_topic, 10)
 
         # Vehicle & Algorithmic Parameters
         self.CAR_WIDTH = 0.33             # Total vehicle width (meters)

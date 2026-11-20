@@ -13,8 +13,14 @@ def euler_from_quaternion(q):
 class PurePursuit(Node):
     def __init__(self):
         super().__init__('pure_pursuit_node')
-        self.sub = self.create_subscription(Odometry, '/ego_racecar/odom', self.odom_callback, 10)
-        self.pub = self.create_publisher(AckermannDriveStamped, '/drive', 10)
+        # odom_topic: /odom on the car, /ego_racecar/odom in the sim.
+        # drive_topic: set to the AEB gate's input (e.g. /nav_drive) so AEB can stop the car.
+        self.declare_parameter('odom_topic', '/odom')
+        self.declare_parameter('drive_topic', '/drive')
+        odom_topic = self.get_parameter('odom_topic').get_parameter_value().string_value
+        drive_topic = self.get_parameter('drive_topic').get_parameter_value().string_value
+        self.sub = self.create_subscription(Odometry, odom_topic, self.odom_callback, 10)
+        self.pub = self.create_publisher(AckermannDriveStamped, drive_topic, 10)
         
         # Pure Pursuit Tuning Parameters
         self.LWB = 0.33             # Wheelbase (meters)
