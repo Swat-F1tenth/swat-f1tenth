@@ -7,7 +7,7 @@ from scipy import interpolate
 import shapely
 from pathlib import Path
 
-num_tracks = 1
+num_tracks = 150
 num_centerline_coords = 150
 
 #All units in meters unless otherwise specified
