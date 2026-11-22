@@ -7,7 +7,7 @@ from scipy import interpolate
 import shapely
 from pathlib import Path
 
-num_tracks = 150
+num_tracks = 1
 num_centerline_coords = 150
 
 #All units in meters unless otherwise specified
@@ -17,8 +17,8 @@ track_min_size = 20
 max_points=25 #Max number of points to spawn for the concave hull. Higher values leads to basically square tracks, small are more varied.
 min_points=8 #Minimum number of points of the above
 
-max_width=10
-min_width=5
+max_width=30
+min_width=20
 
 script_dir = Path(__file__).resolve().parent
 output_dir_tr = script_dir / "tracks"
@@ -71,10 +71,15 @@ for i in range(0, num_tracks):
     unew = np.arange(0, 1.01, 0.01)
     out = interpolate.splev(unew, tck)
 
+    maxrandvalue_width, addfactor_width = calculate_max(max_width, min_width)
+
+    track_width = np.random.randint(maxrandvalue_width)
+    width = (track_width+addfactor_width)
+
     #ALSO WITH THE OBSTACLE BIT
     #plt.scatter(obstacledata_array[:, 0], obstacledata_array[:, 1], color='black', marker='s', s=0.5, zorder=3)
-    plt.plot(out[0], out[1], color='black', lw=10)
-    plt.plot(out[0], out[1], color='white', lw=8)
+    plt.plot(out[0], out[1], color='black', lw=width)
+    plt.plot(out[0], out[1], color='white', lw=(width-2))
     plt.axis('off')
 
     header_str = "x_m\ty_m"
