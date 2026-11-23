@@ -78,11 +78,36 @@ for i in range(0, num_tracks):
 
     #ALSO WITH THE OBSTACLE BIT
     #plt.scatter(obstacledata_array[:, 0], obstacledata_array[:, 1], color='black', marker='s', s=0.5, zorder=3)
-    plt.plot(out[0], out[1], color='black', lw=width)
-    plt.plot(out[0], out[1], color='white', lw=(width-2))
+    plt.xlim=track_max_size+max_width
+    plt.ylim=track_max_size+max_width
+    plt.plot(out[0], out[1], color='black', lw=width, clip_on=False)
+    plt.plot(out[0], out[1], color='white', lw=(width-2),clip_on=False)
+    plt.axis('equal')
     plt.axis('off')
 
-    header_str = "x_m\ty_m"
+    fig = plt.gcf() 
+    ax = plt.gca()
+    line = ax.get_lines()[-1]
+
+    lw_points = line.get_linewidth()
+    lw_pixels = lw_points * (fig.dpi/72)
+
+    inv_transform = ax.transData.inverted()
+    origin_m = inv_transform.transform((0, 0))
+    offset_m = inv_transform.transform((lw_pixels, 0))
+
+    total_width_m = offset_m[0] - origin_m[0]
+    center_to_edge_m = total_width_m / 2.0
+
+    #print(f"Total width: {total_width_m} m")
+    #print(f"Centerline dist: {center_to_edge_m} m")
+
+    smooth_points = np.insert(smooth_points, smooth_points.shape[1], center_to_edge_m, axis=1)
+    smooth_points = np.insert(smooth_points, smooth_points.shape[1], center_to_edge_m, axis=1)
+    print(type(smooth_points))
+    print(smooth_points)
+
+    header_str = "x_m\ty_m\tw_tr_right_m\tw_tr_left_m"
 
     plt.savefig(output_dir_tr / f"track_{i}.png")
     plt.close()
